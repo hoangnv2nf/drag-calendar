@@ -1,0 +1,18 @@
+
+.drag-caledar-container {
+    max-width: 400px;
+    position: relative;
+    display: flex;
+    border: 1px solid gray;
+    flex-direction: column;
+    padding: 1rem;
+    margin: 2rem auto;
+
+    .calendar-header {
+        height: 2rem;
+
+    }
+    .calendar-body {
+        flex: 1;
+    }
+}

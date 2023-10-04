@@ -1,15 +1,18 @@
-import { NgModule } from '@angular/core';
+import { Inject, ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragCalendarComponent } from './drag-calendar/drag-calendar.component';
+import { DragCalendar } from './drag-calendar/drag-calendar.component';
 import { RouterModule } from '@angular/router';
 import { AdapterService } from './adapter.service';
-import { NativeDateAdapter } from './native-date-adapter';
+import { MonthViewComponent } from './month-view/month-view.component';
+import { CalendarHeader } from './calendar-header/calendar-header.component';
+import { CALENDAR_CONFIG, NATIVE_CONFIG } from './config';
+import { DateAdapter } from './date-adapter.service';
 
 @NgModule({
   imports: [RouterModule.forChild([
     {
       path: '',
-      component: DragCalendarComponent
+      component: DragCalendar
     }
   ])],
   exports: [RouterModule]
@@ -19,7 +22,9 @@ export class CalendarRoutingModule { }
 
 @NgModule({
   declarations: [
-    DragCalendarComponent
+    MonthViewComponent,
+    CalendarHeader,
+    DragCalendar
   ],
   imports: [
     CommonModule,
@@ -27,18 +32,31 @@ export class CalendarRoutingModule { }
   ],
   providers: [
     AdapterService,
-    // NativeDateAdapter,
+    DateAdapter,
     {
-      provide: NativeDateAdapter,
-      useFactory: () => {
-        const offset = new Date().getTimezoneOffset() * -1 / 60;
-        console.log(offset);
-        const adapter = new NativeDateAdapter();
-        // adapter.setLocale('ja');
-        adapter.setLocale('en-US');
-        return adapter
-      }
+      provide: CALENDAR_CONFIG,
+      useValue: NATIVE_CONFIG
     }
   ]
 })
-export class CalendarModule { }
+export class CalendarModule { 
+  static forFeature(config: Partial<ICalendarConfig>): ModuleWithProviders<CalendarModule> {
+    const _config: ICalendarConfig = {...NATIVE_CONFIG, ...config};
+    return {
+      ngModule: CalendarModule,
+      providers: [
+        AdapterService,
+        {
+          provide: CALENDAR_CONFIG,
+          useValue: {...NATIVE_CONFIG, ...config}
+        },
+        {
+          provide: DateAdapter,
+          useFactory: () => {
+            return new DateAdapter(_config);
+          }
+        }
+      ]
+    }
+  }
+}

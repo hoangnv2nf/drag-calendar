@@ -1,9 +1,7 @@
-<p>drag-calendar works!</p>
-<div *ngFor="let x of monthsName">
-    <p>{{x}}</p>
+
+<div class="drag-calendar-container">
+    <app-calendar-header class="calendar-header"></app-calendar-header>
+    <div class="calendar-body">
+        <app-month-view></app-month-view>
+    </div>
 </div>
-<p>Day of weeks</p>
-<div *ngFor="let x of dayOfWeekNames">
-    <p>{{x}}</p>
-</div>
-<div>{{firstdayofweek}}</div>

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { NativeDateAdapter } from '../native-date-adapter';
+import { DateAdapter } from '../date-adapter.service';
 
 @Component({
   selector: 'app-drag-calendar',
@@ -7,13 +7,10 @@ import { NativeDateAdapter } from '../native-date-adapter';
   styleUrls: ['./drag-calendar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DragCalendarComponent implements OnInit {
-  dateAdapter = inject(NativeDateAdapter);
-  monthsName: string[] = [];
-  dayOfWeekNames: string[] = [];
-  firstdayofweek = this.dateAdapter.getFirstDayOfWeek();
+export class DragCalendar implements OnInit {
+  dateAdapter = inject(DateAdapter);
+  currentView: TCalendarView = 'month';
+  activeDate: Date = new Date();
   ngOnInit() {
-    this.monthsName = this.dateAdapter.getMonthNames('narrow');
-    this.dayOfWeekNames = this.dateAdapter.getDayOfWeekNames('narrow')
   }
 }

@@ -1,5 +1,6 @@
-import { Injectable } from "@angular/core";
-import { DateAdapter } from "./date-adapter";
+import { Inject, Injectable } from "@angular/core";
+import { CALENDAR_CONFIG } from "./config";
+import { DateAdapterBase } from "./date-adapter-base";
 /** Creates an array and fills it with values. */
 function range<T>(length: number, valueFunction: (index: number) => T): T[] {
     const valuesArray = Array(length);
@@ -10,7 +11,22 @@ function range<T>(length: number, valueFunction: (index: number) => T): T[] {
 }
 
 @Injectable()
-export class NativeDateAdapter extends DateAdapter<Date> {
+export class DateAdapter extends DateAdapterBase<Date> {
+    
+    constructor(
+        @Inject(CALENDAR_CONFIG) private config: ICalendarConfig
+    ) {
+        super();
+        this.init()
+    }
+    private init() {
+        const offset = new Date().getTimezoneOffset() * -1 / 60;
+        if (Math.abs(offset) == 9) {
+            this.setLocale('jp');
+            return;
+        }
+        this.setLocale('en-US')
+    }
     getYear(date: Date): number {
         return date.getFullYear();
     }
@@ -48,8 +64,7 @@ export class NativeDateAdapter extends DateAdapter<Date> {
     }
 
     getFirstDayOfWeek(): number {
-        // We can't tell using native JS Date what the first day of the week is, we default to Sunday.
-        return 0;
+        return this.config.firstDayOfWeek ?? 0;
     }
 
     getNumDaysInMonth(date: Date): number {
@@ -99,7 +114,17 @@ export class NativeDateAdapter extends DateAdapter<Date> {
             this.getDate(date) + days,
         );
     }
+    isValid(date: Date) {
+        return !isNaN(date.getTime());
+    }
+    format(date: Date, displayFormat: Object): string {
+        if (!this.isValid(date)) {
+            throw Error('NativeDateAdapter: Cannot format invalid date.');
+        }
 
+        const dtf = new Intl.DateTimeFormat(this.locale, { ...displayFormat, timeZone: 'utc' });
+        return this._format(dtf, date);
+    }
     /**
      * When converting Date object to string, javascript built-in functions may return wrong
      * results because it applies its internal DST rules. The DST rules around the world change
